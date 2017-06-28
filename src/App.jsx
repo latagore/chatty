@@ -23,12 +23,17 @@ class App extends Component {
     };
   }
 
+  onMessage(message) {
+    message.id = this.state.messages.length;
+    this.setState({messages: this.state.messages.concat([message])});
+  }
+
   render() {
     return (
       <div>
         <NavBar />
         <MessageList messages={this.state.messages}/>
-        <ChatBar currentUser={this.state.currentUser} />
+        <ChatBar currentUser={this.state.currentUser} onMessage={this.onMessage.bind(this)} />
       </div>
     );
   }
