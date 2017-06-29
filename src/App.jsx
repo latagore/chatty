@@ -38,8 +38,11 @@ class App extends Component {
   }
 
   _addMessage(message) {
-    message.id = this.state.messages.length;
     this.setState({messages: this.state.messages.concat([message])});
+  }
+
+  _onUsernameChange(username) {
+    this.setState({ currentUser: username });
   }
 
   render() {
@@ -47,7 +50,7 @@ class App extends Component {
       <div>
         <NavBar />
         <MessageList messages={this.state.messages}/>
-        <ChatBar currentUser={this.state.currentUser} onMessage={this._onMessage.bind(this)} />
+        <ChatBar currentUser={this.state.currentUser} onUsernameChange={this._onUsernameChange.bind(this)} onMessage={this._onMessage.bind(this)} />
       </div>
     );
   }
