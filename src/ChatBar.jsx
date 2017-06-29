@@ -12,6 +12,7 @@ class ChatBar extends Component {
   onMessageKeyDown(event) {
     const ENTER = 13;
     if (event.keyCode === ENTER) {
+      this.props.onUsernameChange({ name: this.state.usernameValue });
       this.props.onMessage({ username: this.state.usernameValue, content: this.state.messageValue });
       this.setState({messageValue: ''});
     }
