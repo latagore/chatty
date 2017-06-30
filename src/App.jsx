@@ -1,4 +1,5 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
+import { setWsHeartbeat } from "ws-heartbeat/client";
 import NavBar from './NavBar.jsx';
 import MessageList from './MessageList.jsx'
 import ChatBar from './ChatBar.jsx';
@@ -28,8 +29,18 @@ class App extends Component {
     this.socket.onopen = () => {
       this.socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
+        if (data.type === 'connectedUsersUpdated') {
+          this.setState({usersOnline: data. number});
+          return;
+        } if (data.kind === "pong") {
+          // ignore pong messages from ws-heartbeat
+          return;
+        }
         this._addMessage(data);
       }
+
+      // tell the server we are stil alive
+      setWsHeartbeat(this.socket, '{"kind":"ping"}');
     }
   }
 
@@ -44,14 +55,16 @@ class App extends Component {
 
   _onUsernameChange(user) {
     const oldUsername = this.state.currentUser.name;
-    this.setState({ currentUser: user });
-    this.socket.send(JSON.stringify({type: "postNotification", content: `${oldUsername} changed their name to ${user.name}.` }));
+    if (oldUsername !== user.name) {
+      this.setState({ currentUser: user });
+      this.socket.send(JSON.stringify({type: "postNotification", content: `${oldUsername} changed their name to ${user.name}.` }));
+    }
   }
 
   render() {
     return (
       <div>
-        <NavBar />
+        <NavBar usersOnline={this.state.usersOnline}/>
         <MessageList messages={this.state.messages}/>
         <ChatBar currentUser={this.state.currentUser} onUsernameChange={this._onUsernameChange.bind(this)} onMessage={this._onMessage.bind(this)} />
       </div>

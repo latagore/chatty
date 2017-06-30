@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-class NavBar extends Component {
+class Message extends Component {
   render() {
     if (this.props.type === "incomingNotification") {
       return (
@@ -18,4 +18,4 @@ class NavBar extends Component {
     }
   }
 }
-export default NavBar;
+export default Message;
