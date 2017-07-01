@@ -1,45 +1,16 @@
-React Boilerplate
+# Chatty App
 =====================
 
-A minimal and light dev environment for ReactJS.
+A simple app built with React.js and WebSockets for a student project at Lighthouse Labs. Features include notifications when users leave and join, inlining images for links and giving users colors for their usernames.
 
-### Usage
+# TL;DR Setup
+1. Download the project from github and change directory to it.
+2. Install Node.js.
+3. Install dependencies with `npm install`.
+4. Change directory to chatty-server: `cd chatty-server`.
+5. Install dependencies for it as well with `npm install`.
+6. Start the web socket server in the same folder with `npm start`.
+7. Change back to the root directory and start the web server with `npm start`.
 
-Clone the boilerplate and create your own git repo.
-
-```
-git clone git@github.com:lighthouse-labs/react-simple-boilerplate.git
-cd react-simple-boilerplate
-git remote rm origin
-git remote add origin [YOUR NEW REPOSITORY]
-# Manually update your package.json file
-```
-
-Install the dependencies and start the server.
-
-```
-npm install
-npm start
-open http://localhost:3000
-```
-
-### Static Files
-
-You can store static files like images, fonts, etc in the `build` folder.
-
-For example, if you copy a file called my_image.png into the build folder you can access it using `http://localhost:3000/build/my_image.png`.
-
-### Linting
-
-This boilerplate project includes React ESLint configuration.
-
-```
-npm run lint
-```
-
-### Dependencies
-
-* React
-* Webpack
-* [babel-loader](https://github.com/babel/babel-loader)
-* [webpack-dev-server](https://github.com/webpack/webpack-dev-server)
+# Screenshots
+![Demo](blah "Alice and Bob using the chat app")
