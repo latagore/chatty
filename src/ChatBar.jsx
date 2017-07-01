@@ -11,7 +11,7 @@ class ChatBar extends Component {
 
   _onMessageKeyDown(event) {
     const ENTER = 13;
-    if (event.keyCode === ENTER) {
+    if (event.keyCode === ENTER && this.state.messageValue !== "") {
       this.props.onMessage(this.state.messageValue);
       this.setState({messageValue: ''});
     }
