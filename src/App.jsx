@@ -9,34 +9,33 @@ class App extends Component {
     super();
     this.state = {
       currentUser: {name: "Bob"}, // optional. if currentUser is not defined, it means the user is Anonymous
-      messages: [
-        {
-          id: 0,
-          username: "Bob",
-          content: "Has anyone seen my marbles?",
-        },
-        {
-          id: 1,
-          username: "Anonymous",
-          content: "No, I think you lost them. You lost your marbles Bob. You lost them for good."
-        }
-      ]
+      messages: []
     };
   }
 
   componentDidMount() {
     this.socket = new WebSocket("ws://localhost:3001/");
     this.socket.onopen = () => {
+      this._sendSetup();
+
       this.socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.type === 'connectedUsersUpdated') {
-          this.setState({usersOnline: data. number});
+        const message = JSON.parse(event.data);
+          if (message.type === 'connectedUsersUpdated') {
+          this.setState({usersOnline: message. number});
           return;
-        } if (data.kind === "pong") {
+        } else if (message.kind === "pong") {
           // ignore pong messages from ws-heartbeat
           return;
+        } else if (message.type === "setup") {
+          const newUser = this.state.currentUser;
+          console.log(message);
+          newUser.color = message.data.color;
+          this.setState({currentUser: newUser})
+        } else if (message.type === "incomingMessage" || message.type === "incomingNotification") {
+          this._addMessage(message);
+        } else {
+          console.error("unknown message: ", message);
         }
-        this._addMessage(data);
       }
 
       // tell the server we are stil alive
@@ -44,8 +43,18 @@ class App extends Component {
     }
   }
 
+  _sendSetup() {
+    const setupMessage = {
+      type: 'postSetup',
+      username: this.state.currentUser.name
+    };
+    this.socket.send(JSON.stringify(setupMessage));
+  }
+
   _onMessage(message) {
     message.type = "postMessage";
+    message.color = this.state.currentUser.color;
+    console.log(this.state.currentUser.color);
     this.socket.send(JSON.stringify(message));
   }
 
@@ -57,6 +66,7 @@ class App extends Component {
     const oldUsername = this.state.currentUser.name;
     if (oldUsername !== user.name) {
       this.setState({ currentUser: user });
+      this.socket.send(JSON.stringify({type: "changeUsername", oldUsername, nwUsername: user.name }));
       this.socket.send(JSON.stringify({type: "postNotification", content: `${oldUsername} changed their name to ${user.name}.` }));
     }
   }
