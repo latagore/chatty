@@ -96,17 +96,14 @@ function clientConnected(ws, clientId) {
     color: getRandomColor()
   }
 
-  // Setup message to be set to the client
-  // Includes all currently connected clients
-  const setupMsg = {
-    type: 'setup',
-    data: clients[clientId]
-  }
 
   if (ws.readyState === ws.OPEN) {
-    ws.send(JSON.stringify(setupMsg))
+    ws.send(JSON.stringify({
+      type: 'incomingSetup',
+      data: clients[clientId]
+    }))
+    broadcastUpdatedUsers();
   }
-  broadcastUpdatedUsers();
 }
 
 // Disconnection event

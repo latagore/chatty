@@ -33,7 +33,7 @@ class App extends Component {
 
       this.socket.onmessage = (event) => {
         const message = JSON.parse(event.data);
-        if (message.type === "setup") {
+        if (message.type === "incomingSetup") {
           const newUser = this.state.currentUser;
           newUser.color = message.data.color;
           this.setState({currentUser: newUser})
