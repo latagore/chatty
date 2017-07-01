@@ -4,11 +4,19 @@ import NavBar from './NavBar.jsx';
 import MessageList from './MessageList.jsx'
 import ChatBar from './ChatBar.jsx';
 
+// converts empty strings into "Anonymous"
+function getUsernameFrom(value) {
+  if (!value) {
+    return "Anonymous";
+  }
+  return value;
+}
+
 class App extends Component {
   constructor() {
     super();
     this.state = {
-      currentUser: {name: "Bob"}, // optional. if currentUser is not defined, it means the user is Anonymous
+      currentUser: {name: ""}, // optional. if currentUser is not defined, it means the user is Anonymous
       messages: []
     };
   }
@@ -46,13 +54,14 @@ class App extends Component {
   _sendSetup() {
     const setupMessage = {
       type: 'postSetup',
-      username: this.state.currentUser.name
+      username: getUsernameFrom(this.state.currentUser.name)
     };
     this.socket.send(JSON.stringify(setupMessage));
   }
 
   _onMessage(message) {
     message.type = "postMessage";
+    message.username = getUsernameFrom(this.state.currentUser.name);
     message.color = this.state.currentUser.color;
     console.log(this.state.currentUser.color);
     this.socket.send(JSON.stringify(message));
@@ -63,11 +72,15 @@ class App extends Component {
   }
 
   _onUsernameChange(user) {
-    const oldUsername = this.state.currentUser.name;
-    if (oldUsername !== user.name) {
-      this.setState({ currentUser: user });
-      this.socket.send(JSON.stringify({type: "changeUsername", oldUsername, nwUsername: user.name }));
-      this.socket.send(JSON.stringify({type: "postNotification", content: `${oldUsername} changed their name to ${user.name}.` }));
+    const oldUsername = getUsernameFrom(this.state.currentUser.name);
+    const newUsername = getUsernameFrom(user.name);
+    console.log(oldUsername, newUsername);
+    if (oldUsername !== newUsername) {
+      this.setState((state) => {
+        state.currentUser.name = newUsername;
+        return state;
+      });
+      this.socket.send(JSON.stringify({type: "changeUsername", oldUsername, newUsername: newUsername }));
     }
   }
 
@@ -76,7 +89,9 @@ class App extends Component {
       <div>
         <NavBar usersOnline={this.state.usersOnline}/>
         <MessageList messages={this.state.messages}/>
-        <ChatBar currentUser={this.state.currentUser} onUsernameChange={this._onUsernameChange.bind(this)} onMessage={this._onMessage.bind(this)} />
+        <ChatBar currentUser={this.state.currentUser}
+          onUsernameChange={this._onUsernameChange.bind(this)}
+          onMessage={this._onMessage.bind(this)} />
       </div>
     );
   }
