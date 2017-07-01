@@ -24,46 +24,44 @@ class App extends Component {
   componentDidMount() {
     this.socket = new WebSocket("ws://localhost:3001/");
     this.socket.onopen = () => {
-      this._sendSetup();
+
+      // send a message to setup the chat connection
+      this.socket.send(JSON.stringify({
+        type: 'postSetup',
+        username: getUsernameFrom(this.state.currentUser.name)
+      }));
 
       this.socket.onmessage = (event) => {
         const message = JSON.parse(event.data);
-          if (message.type === 'connectedUsersUpdated') {
-          this.setState({usersOnline: message. number});
-          return;
-        } else if (message.kind === "pong") {
-          // ignore pong messages from ws-heartbeat
-          return;
-        } else if (message.type === "setup") {
+        if (message.type === "setup") {
           const newUser = this.state.currentUser;
-          console.log(message);
           newUser.color = message.data.color;
           this.setState({currentUser: newUser})
+        } else if (message.type === 'connectedUsersUpdated') {
+          this.setState({usersOnline: message.number});
         } else if (message.type === "incomingMessage" || message.type === "incomingNotification") {
           this._addMessage(message);
+        } else if (message.type === "pong") {
+          // ignore pong messages from ws-heartbeat
+          return;
         } else {
           console.error("unknown message: ", message);
         }
       }
 
       // tell the server we are stil alive
-      setWsHeartbeat(this.socket, '{"kind":"ping"}');
+      setWsHeartbeat(this.socket, '{"type":"ping"}');
     }
   }
 
-  _sendSetup() {
-    const setupMessage = {
-      type: 'postSetup',
-      username: getUsernameFrom(this.state.currentUser.name)
+  _onMessage(messageContent) {
+    const message = {
+      type: "postMessage",
+      username: getUsernameFrom(this.state.currentUser.name),
+      color: this.state.currentUser.color,
+      content: messageContent
     };
-    this.socket.send(JSON.stringify(setupMessage));
-  }
 
-  _onMessage(message) {
-    message.type = "postMessage";
-    message.username = getUsernameFrom(this.state.currentUser.name);
-    message.color = this.state.currentUser.color;
-    console.log(this.state.currentUser.color);
     this.socket.send(JSON.stringify(message));
   }
 
@@ -71,10 +69,9 @@ class App extends Component {
     this.setState({messages: this.state.messages.concat([message])});
   }
 
-  _onUsernameChange(user) {
+  _onUsernameChange(username) {
     const oldUsername = getUsernameFrom(this.state.currentUser.name);
-    const newUsername = getUsernameFrom(user.name);
-    console.log(oldUsername, newUsername);
+    const newUsername = getUsernameFrom(username);
     if (oldUsername !== newUsername) {
       this.setState((state) => {
         state.currentUser.name = newUsername;

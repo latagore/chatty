@@ -19,8 +19,8 @@ const server = express()
 // Create the WebSockets server
 const wss = new SocketServer({ server });
 setWsHeartbeat(wss, (ws, data, pong) => {
-    if (data === '{"kind":"ping"}') { // send pong if recieved a ping.
-        ws.send('{"kind":"pong"}');
+    if (data === '{"type":"ping"}') { // send pong if recieved a ping.
+        ws.send('{"type":"pong"}');
     }
 });
 // Set up a callback that will run when a client connects to the server
@@ -42,8 +42,6 @@ wss.on('connection', (ws) => {
 
   clientConnected(ws, clientId);
 
-
-
   ws.on('message', (message) => {
     message = JSON.parse(message);
     if (message.type === "postNotification") {
@@ -59,8 +57,15 @@ wss.on('connection', (ws) => {
       return;
     } else if (message.type === "postSetup") {
       clients[clientId].username = message.username;
+
+      // broadcast after the client tells us they have connected
+      wss.broadcast({
+        type: 'incomingNotification',
+        content: `${message.username} has connected.`
+      });
+
       return;
-    } else if (message.kind === "ping") {
+    } else if (message.type === "ping") {
       // ignore message, is for ws-heartbeat
       return;
     } else {
@@ -73,10 +78,6 @@ wss.on('connection', (ws) => {
   ws.on('close', () => {
     clientDisconnected(ws, clientId);
     console.log('Client disconnected');
-    wss.broadcast({
-      type: "connectedUsersUpdated",
-      number: Array.from(wss.clients.values()).filter((client) => client.readyState === WebSocket.OPEN).length
-    });
   });
 });
 
@@ -89,7 +90,6 @@ function broadcastUpdatedUsers() {
 
 // Connection event
 function clientConnected(ws, clientId) {
-
   // Create client data
   clients[clientId] = {
     id: clientId,
@@ -111,17 +111,16 @@ function clientConnected(ws, clientId) {
 
 // Disconnection event
 function clientDisconnected(ws, clientId) {
-  const client = clients[clientId]
-
+  const client = clients[clientId];
   if (!client) return; // catch race condition
 
-  const disconnectionMsg = {
+  wss.broadcast({
     type: 'incomingNotification',
     content: `${client.username} has disconnected.`
-  }
-
-  wss.broadcast(disconnectionMsg);
+  });
   clients[clientId] = undefined;
+
+  broadcastUpdatedUsers();
 }
 
 const RANDOM_COLORS = ["#1a6aed", "#1aed52", "#ed8a1a", "#711aed"];
