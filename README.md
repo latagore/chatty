@@ -13,4 +13,4 @@ A simple app built with React.js and WebSockets for a student project at Lightho
 7. Change back to the root directory and start the web server with `npm start`.
 
 # Screenshots
-![Demo](blah "Alice and Bob using the chat app")
+![Alice and Bob using the chat app](https://raw.githubusercontent.com/latagore/chatty/master/screenshots/demo.png "Alice and Bob using the chat app")
