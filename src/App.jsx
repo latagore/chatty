@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { setWsHeartbeat } from "ws-heartbeat/client";
-import NavBar from './NavBar.jsx';
-import MessageList from './MessageList.jsx'
-import ChatBar from './ChatBar.jsx';
+import NavBar from './Components/NavBar.jsx';
+import MessageList from './Components/MessageList.jsx'
+import ChatBar from './Components/ChatBar.jsx';
 
 // converts empty strings into "Anonymous"
 function getUsernameFrom(value) {
