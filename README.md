@@ -1,5 +1,4 @@
 # Chatty App
-=====================
 
 A simple app built with React.js and WebSockets for a student project at Lighthouse Labs. Features include notifications when users leave and join, inlining images for links and giving users colors for their usernames.
 
